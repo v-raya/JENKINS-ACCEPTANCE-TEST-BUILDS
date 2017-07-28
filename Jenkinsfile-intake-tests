@@ -35,11 +35,10 @@ def notifyBuild(String buildStatus, Exception e) {
 }
 
 node {
-   properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), 
-              [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], 
+   properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
+              [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
-			  string(defaultValue: 'screening', description: '', name: 'FEATURE_SET'), 
-			  string(defaultValue: 'webkit', description: '', name: 'CAPYBARA_DRIVER'), 
+			  string(defaultValue: 'screening', description: '', name: 'FEATURE_SET'),
 			  string(defaultValue: 'https://web.preint.cwds.io/intake', description: '', name: 'APP_URL')]),pipelineTriggers([])])
 
    def errorcode = null;
@@ -77,7 +76,7 @@ node {
                 step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
     }
 
-	
+
  } catch (Exception e)    {
 	   errorcode = e
 	   currentBuild.result = "FAIL"
