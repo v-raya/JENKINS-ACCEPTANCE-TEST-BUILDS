@@ -53,10 +53,16 @@ node ('preint') {
    stage('Run tests'){
      bzt "src/test/resources/jmeter/referrals.jmx"
 	 bzt "src/test/resources/jmeter/_reporters.jmx"
+	 bzt "src/test/resources/jmeter/_referralClients.jmx"
+	 bzt "src/test/resources/jmeter/_staffpersons.jmx"
+	 bzt "src/test/resources/jmeter/_allegations.jmx"
+	 bzt "src/test/resources/jmeter/_clients.jmx"
+	 bzt "src/test/resources/jmeter/referrals.jmx"
+	 bzt "src/test/resources/jmeter/CmsReferralLegacyNSComparison.jmx"
   }
 
 	stage ('Reports') {
-        step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+        perfReport modeThroughput: true, sourceDataFiles: '**/reports/*.xml'
     }
 
 
