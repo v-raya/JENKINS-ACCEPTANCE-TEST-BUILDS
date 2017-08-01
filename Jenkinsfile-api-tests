@@ -51,12 +51,14 @@ node ('preint') {
 		  git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/acceptance_testing.git'
    }
    stage('Build Docker'){
+      withEnv("CAPYBARA_DRIVER=webkit"){
         sh 'docker-compose build'
 		//withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
 			//sh "docker tag cwds/acceptance_testing cwds/acceptance_testing:${version}"
 			//sh "docker push cwds/acceptance_testing cwds/acceptance_testing:${version}"
 		//}
-	 }
+	  }
+	}
    stage('Run tests webkit'){
       withEnv(["APP_URL=${APP_URL}",
                "FEATURE_SET=${FEATURE_SET}",
