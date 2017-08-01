@@ -38,8 +38,9 @@ node ('preint') {
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
-			  string(defaultValue: 'screening', description: '', name: 'FEATURE_SET'),
-			  string(defaultValue: 'https://web.preint.cwds.io/intake', description: '', name: 'APP_URL')]),pipelineTriggers([])])
+			  string(defaultValue: '8080', description: '', name: 'APP_PORT'),
+			  string(defaultValue: '10', description: '', name: 'API_USERS'),
+			  string(defaultValue: 'api-a.preint.cwds.io', description: '', name: 'APP_HOST')]),pipelineTriggers([])])
 
    def errorcode = null;
    def buildInfo = '';
@@ -51,18 +52,22 @@ node ('preint') {
 		  git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/API.git'
    }
    stage('Run tests'){
-     bzt "src/test/resources/jmeter/referrals.jmx"
-	 bzt "src/test/resources/jmeter/_reporters.jmx"
-	 bzt "src/test/resources/jmeter/_referralClients.jmx"
-	 bzt "src/test/resources/jmeter/_staffpersons.jmx"
-	 bzt "src/test/resources/jmeter/_allegations.jmx"
-	 bzt "src/test/resources/jmeter/_clients.jmx"
-	 bzt "src/test/resources/jmeter/referrals.jmx"
-	 bzt "src/test/resources/jmeter/CmsReferralLegacyNSComparison.jmx"
-  }
+     withEnv(["APP_HOST=${APP_HOST}",
+               "APP_PORT=${APP_PORT}",
+			   "API_USERS=${API_USERS}"]){
+			   bzt "src/test/resources/jmeter/referrals.jmx"
+			   bzt "src/test/resources/jmeter/_reporters.jmx"
+			   bzt "src/test/resources/jmeter/_referralClients.jmx"
+			   bzt "src/test/resources/jmeter/_staffpersons.jmx"
+			   bzt "src/test/resources/jmeter/_allegations.jmx"
+			   bzt "src/test/resources/jmeter/_clients.jmx"
+			   bzt "src/test/resources/jmeter/referrals.jmx"
+			   bzt "src/test/resources/jmeter/CmsReferralLegacyNSComparison.jmx"
+		}
+	}
 
 	stage ('Reports') {
-        perfReport modeThroughput: true, sourceDataFiles: '**/reports/*.xml'
+        perfReport errorFailedThreshold: 10, errorUnstableThreshold: 5, modeThroughput: true, sourceDataFiles: ' **/*.jtl'
     }
 
 
