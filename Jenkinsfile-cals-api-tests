@@ -61,7 +61,7 @@ node ('preint') {
                 def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTests'
       }
 	  }
-	  }	stage ('Reports') {
+	  stage ('Reports') {
                 step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
     }
 
