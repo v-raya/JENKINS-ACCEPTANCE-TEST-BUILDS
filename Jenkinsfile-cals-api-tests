@@ -35,6 +35,8 @@ def notifyBuild(String buildStatus, Exception e) {
 }
 
 node ('preint') {
+   def serverArti = Artifactory.newServer url: 'https://jcenter.bintray.com'
+   def rtGradle = Artifactory.newGradleBuild()
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
@@ -53,8 +55,7 @@ node ('preint') {
    stage('Run tests'){
       withEnv(["cals_api_url=${APP_URL}"]) {
 			    sh 'env'
-			    sh './gradlew integrationTest'
-                //buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTest'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTest'
       }
 	  }
 	  stage ('Reports') {
