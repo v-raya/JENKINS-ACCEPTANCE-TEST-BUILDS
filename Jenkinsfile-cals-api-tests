@@ -35,8 +35,6 @@ def notifyBuild(String buildStatus, Exception e) {
 }
 
 node ('preint') {
-   def serverArti = Artifactory.server 'CWDS_DEV'
-   def rtGradle = Artifactory.newGradleBuild()
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
@@ -51,9 +49,6 @@ node ('preint') {
    stage('Preparation') {
 		  cleanWs()
 		  git branch: '$branch', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cals-api.git'
-		  rtGradle.tool = "Gradle_35"
-		  rtGradle.resolver repo:'repo', server: serverArti
-		  rtGradle.useWrapper = true
 	}
    stage('Run tests'){
       withEnv(["cals_api_url=${APP_URL}"]) {
