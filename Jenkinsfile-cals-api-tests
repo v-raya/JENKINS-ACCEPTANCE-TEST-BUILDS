@@ -58,7 +58,8 @@ node ('preint') {
    stage('Run tests'){
       withEnv(["cals_api_url=${APP_URL}"]) {
 			    sh 'env'
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTests'
+			    sh 'gradlew integrationTests'
+                //buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTests'
       }
 	  }
 	  stage ('Reports') {
