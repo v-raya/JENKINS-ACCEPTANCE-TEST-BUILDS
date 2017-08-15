@@ -57,13 +57,12 @@ node ('preint') {
 
 	}
    stage('Run tests'){
-      withEnv(["cals_api_url=${APP_URL}"]) {
-			    sh 'env'
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTest'
-      }
-	  }
-	  stage ('Reports') {
-                step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+     writeFile file: 'gradle.properties', text: 'cals.api.url=${APP_URL}'
+	 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTest'
+	}
+	
+	stage ('Reports') {
+	  step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
     }
 
 
