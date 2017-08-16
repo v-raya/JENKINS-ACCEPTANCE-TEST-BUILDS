@@ -30,7 +30,7 @@ def notifyBuild(String buildStatus, Exception e) {
       body: details,
       attachLog: true,
       recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-      to: "Alex.Kuznetsov@osi.ca.gov"
+      to: "Alex.Kuznetsov@osi.ca.gov, leonid.marushevskiy@osi.gov.ca"
     )
 }
 
@@ -62,7 +62,7 @@ node ('preint') {
 	}
 	
 	stage ('Reports') {
-	  step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+	  publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/integrationTest', reportFiles: 'index.html', reportName: 'Integration Test Report', reportTitles: ''])
     }
 
 
