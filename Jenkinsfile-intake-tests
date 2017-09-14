@@ -38,8 +38,8 @@ node ('preint') {
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
-			  string(defaultValue: 'screening', description: '', name: 'FEATURE_SET'),
-			  string(defaultValue: 'https://web.preint.cwds.io/intake', description: '', name: 'APP_URL')]),pipelineTriggers([])])
+			  string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET'),
+			  string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')]),pipelineTriggers([])])
 
    def errorcode = null;
    def buildInfo = '';
@@ -61,7 +61,6 @@ node ('preint') {
       withEnv(["APP_URL=${APP_URL}",
                "FEATURE_SET=${FEATURE_SET}",
                "CAPYBARA_DRIVER=webkit"]) {
-			    sh 'env'
                 sh 'docker-compose run acceptance_test'
       }
 	  }
@@ -69,11 +68,11 @@ node ('preint') {
       withEnv(["APP_URL=${APP_URL}",
                "FEATURE_SET=${FEATURE_SET}",
                "CAPYBARA_DRIVER=selenium"]) {
-			    sh 'env'
                 sh 'docker-compose run acceptance_test'
       }
-	  }	stage ('Reports') {
-                step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+	  }	
+   stage ('Reports') {
+	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
     }
 
 
