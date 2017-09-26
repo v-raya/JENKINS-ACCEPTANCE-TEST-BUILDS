@@ -71,16 +71,14 @@ node ('preint') {
                 sh 'docker-compose run acceptance_test'
       }
 	  }	
-   stage ('Reports') {
-	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
-	     fingerprint 'reports/*'
-    }
-
-
  } catch (Exception e)    {
 	   errorcode = e
 	   currentBuild.result = "FAIL"
 	   notifyBuild(currentBuild.result,errorcode)
 	   throw e;
+	}
+	finally {
+	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
+	     fingerprint 'reports/*'
 	}
 }
