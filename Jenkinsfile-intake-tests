@@ -73,6 +73,7 @@ node ('preint') {
 	  }	
    stage ('Reports') {
 	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
+	     fingerprint 'reports/*'
     }
 
 
