@@ -75,10 +75,9 @@ node ('preint') {
 	   errorcode = e
 	   currentBuild.result = "FAIL"
 	   notifyBuild(currentBuild.result,errorcode)
-	   throw e;
 	}
 	finally {
-	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
 	     fingerprint 'reports/*'
+	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
 	}
 }
