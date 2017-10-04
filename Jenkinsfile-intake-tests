@@ -53,7 +53,7 @@ node ('preint') {
    }
    stage('Build Docker'){
         sh 'docker-compose build'
-		withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
+		withDockerRegistry([credentialsId: 'a1315b14-e449-464b-a80a-28d8f55143a9']) {
 			sh "docker tag acceptancetestintake_acceptance_test cwds/acceptance_testing:${APP_VERSION}"
 			sh "docker push cwds/acceptance_testing:${APP_VERSION}"
 		}
