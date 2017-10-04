@@ -39,6 +39,7 @@ node ('preint') {
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
 			  string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET'),
+			  string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION'),
 			  string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')]),pipelineTriggers([])])
 
    def errorcode = null;
@@ -52,10 +53,10 @@ node ('preint') {
    }
    stage('Build Docker'){
         sh 'docker-compose build'
-		//withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-			//sh "docker tag cwds/acceptance_testing cwds/acceptance_testing:${version}"
-			//sh "docker push cwds/acceptance_testing cwds/acceptance_testing:${version}"
-		//}
+		withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
+			sh "docker tag cwds/acceptance_testing cwds/acceptance_testing:${APP_VERSION}"
+			sh "docker push cwds/acceptance_testing cwds/acceptance_testing:${APP_VERSION}"
+		}
 	 }
    stage('Run tests webkit'){
       withEnv(["APP_URL=${APP_URL}",
@@ -79,5 +80,6 @@ node ('preint') {
 	finally {
 	     fingerprint 'reports/*'
 	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
+		 
 	}
 }
