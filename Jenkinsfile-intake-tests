@@ -72,13 +72,18 @@ node ('preint') {
                 sh 'docker-compose run acceptance_test'
       }
 	  }	
- } catch (Exception e)    {
+            stage ('Reports') {
+                step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+            }
+
+	  } catch (Exception e)    {
 	   errorcode = e
 	   currentBuild.result = "FAIL"
 	   notifyBuild(currentBuild.result,errorcode)
 	}
 	finally {
 	     fingerprint 'reports/*'
+		 
 	     junit allowEmptyResults: true, testResults: 'reports/TEST-*.xml'
 		 
 	}
