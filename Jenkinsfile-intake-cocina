@@ -21,17 +21,6 @@ def notifyBuild(String buildStatus, Exception e) {
     details +="<p>Error message ${e.message}, stacktrace: ${e}</p>"
     summary +="\nError message ${e.message}, stacktrace: ${e}"
   }
-
-  // Send notifications
-
-  # slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', color: colorCode, message: summary
-  # emailext(
-  #    subject: subject,
-  #    body: details,
-  #    attachLog: true,
-  #    recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-  #    to: "Alex.Kuznetsov@osi.ca.gov"
-  #  )
 }
 
 node ('cocina-env') {
