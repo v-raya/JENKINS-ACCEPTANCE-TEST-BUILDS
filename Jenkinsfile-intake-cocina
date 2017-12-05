@@ -37,13 +37,13 @@ node ('cocina-env') {
  try {
 
    stage('Preparation') {
-		  // cleanWs()
+		  cleanWs()
 		  git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/acceptance_testing.git'   }
    stage('Build Docker'){
         sh 'docker-compose build'
 		withDockerRegistry([credentialsId: 'a1315b14-e449-464b-a80a-28d8f55143a9']) {
-			sh "docker tag acceptancetestintake_acceptance_test cwds/acceptance_testing:${APP_VERSION}"
-			sh "docker push cwds/acceptance_testing:${APP_VERSION}"
+			sudo sh "docker tag acceptancetestintake_acceptance_test cwds/acceptance_testing:${APP_VERSION}"
+			sudo sh "docker push cwds/acceptance_testing:${APP_VERSION}"
 		}
 	 }
    stage('Run tests webkit'){
