@@ -6,12 +6,12 @@ pipeline {
             label 'preint'
         }
         options{
-            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
+            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5'))
             disableConcurrentBuilds()
         }
         parameters{
-            string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET'),
-            string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION'),
+            string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET')
+            string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION')
             string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')
         }
     }
