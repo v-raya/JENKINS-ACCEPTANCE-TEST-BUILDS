@@ -2,18 +2,15 @@ pipeline {
 
     agent {
         reuseNode: true
-        node {
-            label 'preint'
-        }
-        options{
+    }
+    options{
             buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5'))
             disableConcurrentBuilds()
-        }
-        parameters{
+    }
+    parameters{
             string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET')
             string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION')
             string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')
-        }
     }
 
     stages {
