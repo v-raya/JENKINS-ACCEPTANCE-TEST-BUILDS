@@ -61,14 +61,14 @@ node ('preint') {
                "CAPYBARA_DRIVER=selenium",
                "USERNAME=${USERNAME}"
                ]) {
-	        sh 'cd docker/dev/app/cals-acceptance-tests/'
+	        sh 'cd docker/acceptance-tests/'
 		sh 'pwd'
 		sh 'env'
-		sh 'docker-compose -f docker/dev/app/cals-acceptance-tests/docker-compose.yml up --exit-code-from cals_acceptance_test'
+		sh 'docker-compose -f docker/acceptance-tests/docker-compose.yml up --exit-code-from cals_acceptance_test'
       }
 	}
     stage ('Reports') {
-		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'docker/dev/app/cals-acceptance-tests/reports/coverage/rspec', reportFiles: 'index.html', reportName: 'Cals acceptance tests', reportTitles: ''])
+		publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'docker/acceptance-tests/reports/coverage/rspec', reportFiles: 'index.html', reportName: 'Cals acceptance tests', reportTitles: ''])
     }
     stage ('Integration Env Deploy') {
         build job: '/Integration Environment/deploy-CALS/',
@@ -86,7 +86,7 @@ node ('preint') {
     currentBuild.result = "FAIL"
     notifyBuild(currentBuild.result,errorcode)
   } finally {
-    sh 'docker-compose -f docker/dev/app/cals-acceptance-tests/docker-compose.yml down -v'
+    sh 'docker-compose -f docker/acceptance-tests/docker-compose.yml down -v'
     fingerprint 'reports/*'
   }
 }
