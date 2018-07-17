@@ -78,13 +78,13 @@ node ('preint') {
             ],
             wait: false
     }
-	
+    slackSend channel: '#tech-cals-updates',color: 'good', message: "JOB SUCCEFULL : '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"	
     notifyBuild(currentBuild.result, null)
   
   } catch (Exception e)    {
     errorcode = e
     currentBuild.result = "FAIL"
-    slackSend channel: '#devops-pr',color: 'danger', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+    slackSend channel: '#tech-cals-updates',color: 'danger', message: "JOB FAILED : '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
     notifyBuild(currentBuild.result,errorcode)
   } finally {
     sh 'docker-compose -f docker/acceptance-tests/docker-compose.yml down -v'
