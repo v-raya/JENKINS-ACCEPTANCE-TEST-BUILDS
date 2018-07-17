@@ -22,8 +22,6 @@ def notifyBuild(String buildStatus, Exception e) {
     summary +="\nError message ${e.message}, stacktrace: ${e}"
   }
 
-   slackSend channel: '@Max Ivanov', color: colorCode, message: summary
-
   // Send notifications
   // slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', color: colorCode, message: summary
   // emailext(
@@ -86,6 +84,7 @@ node ('preint') {
   } catch (Exception e)    {
     errorcode = e
     currentBuild.result = "FAIL"
+    slackSend channel: '#devops-pr',color: 'danger', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
     notifyBuild(currentBuild.result,errorcode)
   } finally {
     sh 'docker-compose -f docker/acceptance-tests/docker-compose.yml down -v'
