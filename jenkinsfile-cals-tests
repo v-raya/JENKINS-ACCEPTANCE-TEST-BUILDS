@@ -22,6 +22,8 @@ def notifyBuild(String buildStatus, Exception e) {
     summary +="\nError message ${e.message}, stacktrace: ${e}"
   }
 
+   slackSend channel: '@Max Ivanov', color: colorCode, message: summary
+
   // Send notifications
   // slackSend channel: "#cals-api", baseUrl: 'https://hooks.slack.com/services/', tokenCredentialId: 'slackmessagetpt2', color: colorCode, message: summary
   // emailext(
