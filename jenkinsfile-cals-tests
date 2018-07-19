@@ -78,7 +78,7 @@ node ('preint') {
             ],
             wait: false
     }
-    slackSend channel: '#tech-cals-updates',color: 'good', message: "${env.JOB_NAME} #${env.BUILD_NUMBER} - *${currentBuild.currentResult}* after ${currentBuild.durationString}\n(Details at ${env.BUILD_URL})"	
+    slackSend channel: '#tech-cals-updates',color: 'good', message: "${env.JOB_NAME} #${env.BUILD_NUMBER} - *${currentBuild.currentResult}* after ${currentBuild.durationString}  (<${env.BUILD_URL}|Open>)"	
     notifyBuild(currentBuild.result, null)
   
   } catch (Exception e)    {
