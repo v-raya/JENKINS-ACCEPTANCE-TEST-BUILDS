@@ -39,7 +39,7 @@ node ('preint') {
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
-			  string(defaultValue: '{"user":"RACFID","staffId":"34","roles":["Supervisor"],"county_code":"19","county_name":"Orange","privileges":["CWS Case Management System", "Resource Management", "Resource Mgmt Placement Facility Maint", "Sealed", "Sensitive Persons", "Facility-search-rollout", "RFA-rollout"]}', description: '', name: 'USERNAME'),
+			  string(defaultValue: '{"user":"CALSTEST","staffId":"34","roles":["Supervisor"],"county_code":"19","county_name":"Orange","privileges":["CWS Case Management System", "Resource Management", "Resource Mgmt Placement Facility Maint", "Sealed", "Sensitive Persons", "Facility-search-rollout", "RFA-rollout"]}', description: '', name: 'USERNAME'),
 			  string(defaultValue: '${APP_VERSION}', description: 'Docker hub container version', name: 'APP_VERSION'),
 			  string(defaultValue: 'https://web.preint.cwds.io/cals', description: '', name: 'APP_URL')
 			  ]),
