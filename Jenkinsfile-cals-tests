@@ -1,3 +1,7 @@
+
+
+
+
 pipeline {
     agent none
 
@@ -10,7 +14,7 @@ pipeline {
     }
     parameters {
         string(defaultValue: '', description: '', name: 'version')
-        string(defaultValue: 'master', description: 'Tests source code branch name', name: 'branch')
+        string(defaultValue: 'development', description: 'Tests source code branch name', name: 'branch')
         string(defaultValue: 'true', description: '', name: 'USE_NEWRELIC')
     }
     stages {
@@ -30,36 +34,6 @@ pipeline {
              }
         }
       }
-      stage('Update manifest file for preint'){
-        agent {
-            node {
-                label "master"
-            }
-        }
-        steps{
-             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cws-cares.git'
-             script {
-                def manifestname = 'preint.yaml'
-                def props = readYaml file: manifestname
-                props."cals-api" = version.trim()
-                sh "rm $manifestname"
-                writeYaml file: manifestname, data: props
-             }
-             sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
-                 sh '''
-                    git config --global user.email "cwdsdoeteam@osi.ca.gov"
-                    git config --global user.name "Mr. MGMT. Jenkins"
-                    if [ -z "$(git status --porcelain)" ];
-                    then
-                      echo "Already in manifest."
-                    else
-                      git commit -am \"Update component version from script \"
-                      git push origin master
-                    fi
-                 '''
-             }
-        }
-      }
       stage('Run preint functional test'){
         agent {
             node {
@@ -74,13 +48,8 @@ pipeline {
               def rtGradle = Artifactory.newGradleBuild()
 		      rtGradle.resolver server: serverArti
 		      rtGradle.useWrapper = true
-              def gradlePropsText = """
-                      cals.api.url=https://calsapi.preint.cwds.io/
-                      perry.url=https://web.preint.cwds.io/
-                      login.form.target.url=https://web.preint.cwds.io/perry/login
-                 """
-		      writeFile file: "gradle.properties", text: gradlePropsText
-		      def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean integrationTest'
+		      writeFile file: "gradle.properties", text: "cals.api.url=https://calsapi.preint.cwds.io/"
+		      def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTest'
            }
         }
         post {
@@ -105,36 +74,6 @@ pipeline {
              }
         }
       }
-      stage('Update manifest file for integration'){
-        agent {
-            node {
-                label "master"
-            }
-        }
-        steps{
-             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cws-cares.git'
-             script {
-                def manifestname = 'integration.yaml'
-                def props = readYaml file: manifestname
-                props."cals-api" = version
-                sh "rm $manifestname"
-                writeYaml file: manifestname, data: props
-             }
-             sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
-                 sh '''
-                    git config --global user.email "cwdsdoeteam@osi.ca.gov"
-                    git config --global user.name "Mr. MGMT. Jenkins"
-                    if [ -z "$(git status --porcelain)" ];
-                    then
-                      echo "Already in manifest."
-                    else
-                      git commit -am \"Update component version from script \"
-                      git push origin master
-                    fi
-                 '''
-             }
-        }
-      }
       stage('Run integration smoke test'){
         agent {
             node {
@@ -149,13 +88,8 @@ pipeline {
               def rtGradle = Artifactory.newGradleBuild()
 		      rtGradle.resolver server: serverArti
 		      rtGradle.useWrapper = true
-              def gradlePropsText = """
-                      cals.api.url=https://calsapi.integration.cwds.io/
-                      perry.url=https://web.integration.cwds.io/
-                      login.form.target.url=https://web.integration.cwds.io/perry/login
-                 """
-		      writeFile file: "gradle.properties", text: gradlePropsText
-		      def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean smokeTest'
+		      writeFile file: "gradle.properties", text: "cals.api.url=https://calsapi.integration.cwds.io/"
+		      def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'smokeTest'
 
            }
 

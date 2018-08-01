@@ -34,13 +34,13 @@ def notifyBuild(String buildStatus, Exception e) {
     )
 }
 
-node ('preint') {
+node ('integration02') {
    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')),
               [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
 			  parameters([
 			  string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET'),
 			  string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION'),
-			  string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')]),pipelineTriggers([])])
+			  string(defaultValue: 'https://web.integration02.cwds.io', description: '', name: 'APP_URL')]),pipelineTriggers([])])
 
    def errorcode = null;
    def buildInfo = '';
@@ -58,43 +58,23 @@ node ('preint') {
 			sh "docker push cwds/acceptance_testing:${APP_VERSION}"
 		}
 	 }
-   
+   stage('Run tests webkit'){
+      withEnv(["APP_URL=${APP_URL}",
+               "FEATURE_SET=${FEATURE_SET}",
+               "CAPYBARA_DRIVER=webkit"]) {
+                sh 'docker-compose run acceptance_test'
+      }
+	  }
    stage('Run tests selenium'){
       withEnv(["APP_URL=${APP_URL}",
                "FEATURE_SET=${FEATURE_SET}",
-               "CAPYBARA_DRIVER=xvfb_firefox"]) {
-=======
-pipeline {
-
-    agent {
-        reuseNode: true
-    }
-    options{
-            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5'))
-            disableConcurrentBuilds()
-    }
-    parameters{
-            string(defaultValue: 'smoke', description: '', name: 'FEATURE_SET')
-            string(defaultValue: 'manual-run', description: 'Docker hub container version', name: 'APP_VERSION')
-            string(defaultValue: 'https://web.preint.cwds.io', description: '', name: 'APP_URL')
-    }
-
-    stages {
-        stage('Preparation') {
-            cleanWs()
-            git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/acceptance_testing.git'
-        }
-        stage('Build Docker'){
-            sh 'docker-compose build'
-            withDockerRegistry([credentialsId: 'a1315b14-e449-464b-a80a-28d8f55143a9']) {
-                sh "docker tag acceptancetestintake_acceptance_test cwds/acceptance_testing:${APP_VERSION}"
-                sh "docker push cwds/acceptance_testing:${APP_VERSION}"
+               "CAPYBARA_DRIVER=selenium"]) {
+                sh 'docker-compose run acceptance_test'
+      }
+	  }	
+            stage ('Reports') {
+                step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
             }
-        }
-        stage('Run tests webkit'){
-            withEnv(["APP_URL=${APP_URL}",
-                     "FEATURE_SET=${FEATURE_SET}",
-                     "CAPYBARA_DRIVER=webkit"]) {
 
 	  } catch (Exception e)    {
 	   errorcode = e

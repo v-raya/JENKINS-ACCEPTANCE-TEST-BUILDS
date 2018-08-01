@@ -1,0 +1,139 @@
+pipeline {
+    agent none
+
+    tools {
+        gradle 'Gradle_3.5.1'
+    }
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5'))
+        timestamps()
+    }
+    parameters {
+        string(defaultValue: '', description: '', name: 'version')
+        string(defaultValue: 'development', description: 'Tests source code branch name', name: 'branch')
+        string(defaultValue: 'true', description: '', name: 'USE_NEWRELIC')
+    }
+    stages {
+      stage('PreInt deployment'){
+        agent {
+            node {
+                label "preint"
+                customWorkspace '/opt/jenkins/workspace/AcceptanceTests/cansapi-tests'
+            }
+        }
+        steps{
+             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git'
+             environmentDashboard(addColumns: false, buildJob: '', buildNumber: "${version}", componentName: 'CANS-API', data: [], nameOfEnv: 'PREINT', packageName: 'CANS-API') {
+             script{
+                sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e APP_VERSION=$version -i inventories/preint/hosts.yml deploy-cans-api.yml --vault-password-file ~/.ssh/vault.txt '
+             }
+             }
+        }
+      }
+      stage('Update manifest file for preint'){
+        agent {
+            node {
+                label "master"
+            }
+        }
+        steps{
+             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cws-cares.git'
+             script {
+                def manifestname = 'preint.yaml'
+                def props = readYaml file: manifestname
+                props."cans-api" = version
+                sh "rm $manifestname"
+                writeYaml file: manifestname, data: props
+             }
+             sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
+                 sh '''
+                     git config --global user.email "cwdsdoeteam@osi.ca.gov"
+                     git config --global user.name "Mr. DEV. Jenkins"
+                     if [ -z "$(git status --porcelain)" ];
+                        then
+                          echo "Already in manifest."
+                        else
+                          git commit -am \"Update component version from script \"
+                          git push origin master
+                     fi
+                 '''
+             }
+        }
+      }
+      stage('Run preint functional test'){
+        agent {
+            node {
+                label "preint"
+                customWorkspace '/opt/jenkins/workspace/AcceptanceTests/cansapi-tests'
+            }
+        }
+        steps{
+             script{
+               sh 'docker pull cwds/cans-api-test:$version'
+               sh 'docker run --rm -e CANS_API_URL=https://cansapi.preint.cwds.io -e TEST_TYPE=functional -e PERRY_URL=https://web.preint.cwds.io cwds/cans-api-test:$version'
+             }
+        }
+      }
+      stage('Integration deployment'){
+        agent {
+            node {
+                label "int"
+                customWorkspace '/opt/jenkins/workspace/AcceptanceTests/cansapi-tests'
+            }
+        }
+        steps{
+             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git'
+             environmentDashboard(addColumns: false, buildJob: '', buildNumber: "${version}", componentName: 'CANS-API', data: [], nameOfEnv: 'Integration', packageName: 'CANS-API') {
+             script{
+                sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e APP_VERSION=$version -i inventories/integration/hosts.yml deploy-cans-api.yml --vault-password-file ~/.ssh/vault.txt '
+             }
+             }
+        }
+      }
+      stage('Update manifest file for integration'){
+        agent {
+            node {
+                label "master"
+            }
+        }
+        steps{
+             git branch: 'master', credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/cws-cares.git'
+             script {
+                def manifestname = 'integration.yaml'
+                def props = readYaml file: manifestname
+                props."cans-api" = version
+                sh "rm $manifestname"
+                writeYaml file: manifestname, data: props
+             }
+             sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
+                 sh '''
+                     git config --global user.email "cwdsdoeteam@osi.ca.gov"
+                     git config --global user.name "Mr. DEV. Jenkins"
+                     if [ -z "$(git status --porcelain)" ];
+                        then
+                          echo "Already in manifest."
+                        else
+                          git commit -am \"Update component version from script \"
+                          git push origin master
+                     fi
+                 '''
+             }
+        }
+      }
+      stage('Run integration smoke test'){
+        agent {
+            node {
+                label "int"
+                customWorkspace '/opt/jenkins/workspace/AcceptanceTests/cansapi-tests'
+            }
+        }
+        steps{
+             script{
+               sh 'docker pull cwds/cans-api-test:$version'
+               sh 'docker run --rm -e CANS_API_URL=https://cansapi.integration.cwds.io -e TEST_TYPE=smoke -e PERRY_URL=https://web.integration.cwds.io cwds/cans-api-test:$version'
+             }
+        }
+      }
+
+    }
+}
