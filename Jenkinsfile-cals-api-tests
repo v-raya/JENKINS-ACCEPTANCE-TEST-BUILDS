@@ -12,8 +12,19 @@ pipeline {
         string(defaultValue: '', description: '', name: 'version')
         string(defaultValue: 'master', description: 'Tests source code branch name', name: 'branch')
         string(defaultValue: 'true', description: '', name: 'USE_NEWRELIC')
+        string(defaultValue: 'manual_run', description: '', name: 'triggered_by')
     }
     stages {
+      stage('Preparation'){
+        agent {
+            node {
+                label "master"
+            }
+        }
+        steps{
+             echo "Triggered by ${triggered_by}"
+             }
+      }
       stage('PreInt deployment'){
         agent {
             node {
